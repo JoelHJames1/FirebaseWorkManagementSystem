@@ -35,12 +35,9 @@ const db = getFirestore(app);
 
 // Utility function for logging errors
 const logError = (message: string, error: any) => {
-  // You can replace this with any external logging service, like Sentry
   if (process.env.NODE_ENV === 'production') {
-    // Log to external service
     console.error(`PROD LOG: ${message}`, error);
   } else {
-    // Log to console in development
     console.error(`DEV LOG: ${message}`, error);
   }
 };
@@ -118,7 +115,7 @@ export const addTask = async (title: string, assignedTo: string) => {
 // Fetch tasks where the 'assignedTo' field matches the worker's user ID (uid)
 export const getTasks = async (userId: string) => {
   try {
-    console.log(`Fetching tasks for user: ${userId}`); // Log the UID
+    console.log(`Fetching tasks for user: ${userId}`);
 
     const tasksCollection = collection(db, 'tasks');
     const q = query(tasksCollection, where('assignedTo', '==', userId)); // Filter tasks by assignedTo
@@ -129,12 +126,34 @@ export const getTasks = async (userId: string) => {
       ...doc.data(),
     }));
 
-    console.log(`Fetched tasks:`, tasks); // Log the fetched tasks
+    console.log(`Fetched tasks:`, tasks);
 
     return tasks;
   } catch (error) {
     logError('Error fetching tasks', error);
     throw new Error('Unable to fetch tasks.');
+  }
+};
+
+// Fetch all tasks without filtering by user ID (for admin)
+export const getAllTasks = async () => {
+  try {
+    console.log(`Fetching all tasks`);
+
+    const tasksCollection = collection(db, 'tasks');
+    const querySnapshot = await getDocs(tasksCollection);
+
+    const tasks = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    console.log(`Fetched all tasks:`, tasks);
+
+    return tasks;
+  } catch (error) {
+    logError('Error fetching all tasks', error);
+    throw new Error('Unable to fetch all tasks.');
   }
 };
 

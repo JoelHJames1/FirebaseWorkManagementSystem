@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, Plus, CheckCircle } from 'lucide-react';
-import { getTasks, addTask, completeTask, getWorkers } from '../utils/firebase';
+import { getAllTasks, addTask, completeTask, getWorkers } from '../utils/firebase'; // Updated import to use `getAllTasks`
 
 interface Task {
   id: string;
@@ -33,12 +33,13 @@ const AdminDashboard: React.FC = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const fetchedTasks = await getTasks('');
+        // Fetch all tasks (no user-based filtering for the admin)
+        const fetchedTasks = await getAllTasks(); // Updated to fetch all tasks
         const fetchedWorkers = await getWorkers();
         setTasks(fetchedTasks as Task[]);
         setWorkers(fetchedWorkers as Worker[]);
 
-        // Create a map of uid to email
+        // Create a map of uid to email for easier display
         const workerEmailMap = fetchedWorkers.reduce(
           (acc: { [key: string]: string }, worker: Worker) => {
             acc[worker.uid] = worker.email;
@@ -194,9 +195,7 @@ const AdminDashboard: React.FC = () => {
                   <div>
                     <h3 className="text-lg font-medium">{task.title}</h3>
                     <p className="text-sm text-gray-500">
-                      Assigned to:{' '}
-                      {workerMap[task.assignedTo] || task.assignedTo} (
-                      {task.assignedTo})
+                      Assigned to: {workerMap[task.assignedTo] || task.assignedTo}
                     </p>
                   </div>
                   <div className="flex items-center">
